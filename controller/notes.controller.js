@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 
 export const getAllNotes = async (req, res) => {
         try {
-                const notes = await Note.find();
+                const notes = await Note.find({userId: req.userId });
                 res.status(200).json({
                         success: true,
                         notes,
@@ -42,22 +42,25 @@ export const getNote = async (req, res) => {
                 });
         }
 }
-export const addNote = (req, res) => {
-        const { userId, title, description, color, createdAt } = req.body;
-        const note = new Note({
-                userId,
-                title,
-                description,
-                color,
-                createdAt,
-        });
-        note.save();
-        return res.status(201).json({
-                success: true,
-                message: 'Note created successfully',
-                note,
-        });
-}
+export const addNote = async (req, res) => {
+        const userId = req.userId;
+
+        try {
+                const note = await Note.create({
+                        ...req.body,
+                        userId : userId
+                });
+                res.status(201).json({
+                        success: true,
+                        data: note,
+                });
+        } catch (error) {
+                res.status(400).json({
+                        success: false,
+                        error: error.message,
+                });
+        }
+};
 export const updateNote = async (req, res) => {
         try {
                 const updatedNote = await Note.findByIdAndUpdate(req.params.id, req.body);
