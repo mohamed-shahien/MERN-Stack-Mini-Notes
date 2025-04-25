@@ -3,7 +3,7 @@ import React from 'react'
 import { useAuth } from '../contexts/auth'
 
 const PrivetRouts = () => {
-        const {user} = useAuth() // Replace with your authentication logic
+        const {user} = useAuth() 
         return user ? <Outlet /> : <Navigate to="/login" />
 }
 

@@ -4,7 +4,7 @@ import {toast } from 'react-toastify';
 const AuthContext = createContext()
 const Authprovider = ({ children }) => {
 
-        const [user, setUser] = useState(null);
+        const [user, setUser] = useState(localStorage.getItem("token") || null);
         useEffect(() => {
                 const token = localStorage.getItem("token");
                 if (token) {

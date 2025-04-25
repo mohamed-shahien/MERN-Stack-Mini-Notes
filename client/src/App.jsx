@@ -6,6 +6,7 @@ import NavBar from "./components/NavBar";
 import { Routes, Route } from "react-router-dom";
 import PrivetRouts from "./utils/PrivetRouts";
 import Notes from "./Notes";
+import CreateNote from "./pages/create";
 import { useAuth } from "./contexts/auth";
 import { Navigate } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
@@ -19,6 +20,7 @@ function App() {
       <Routes>
         <Route element={<PrivetRouts />}>
           <Route path="/notes" element={<Notes />} />
+          <Route path="/notes/create" element={<CreateNote />} />
         </Route>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
