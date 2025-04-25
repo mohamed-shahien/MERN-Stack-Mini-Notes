@@ -16,6 +16,7 @@ export const Login = async (req, res) => {
                 if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
                 const token = await generateToken({ id: user._id }, "1d");
                 return res.status(200).json({
+                        success: true,
                         message: "Login successful",
                         user: {
                                 id: user._id,
@@ -35,19 +36,19 @@ export const Register = async (req, res) => {
         if (!email || !password) {
                 return res
                         .status(400)
-                        .json({ success: false, error: "Please provide an email and password" });
+                        .json({ success: false, message: "Please provide an email and password" });
         }
 
         if (!validator.isEmail(email)) {
                 return res
                         .status(400)
-                        .json({ success: false, error: "Please provide a valid email" });
+                        .json({ success: false, message: "Please provide a valid email" });
         }
 
         if (!validator.isStrongPassword(password)) {
                 return res
                         .status(400)
-                        .json({ success: false, error: "Please provide a strong password" });
+                        .json({ success: false, message: "Please provide a strong password" });
         }
 
         try {
@@ -56,7 +57,7 @@ export const Register = async (req, res) => {
                 if (userExists) {
                         return res
                                 .status(400)
-                                .json({ success: false, error: "User already exists" });
+                                .json({ success: false, message: "User already exists" });
                 }
 
                 const salt = await bcrypt.genSalt(10);
@@ -73,7 +74,7 @@ export const Register = async (req, res) => {
 
                 res.status(200).json({ success: true, token });
         } catch (error) {
-                res.status(500).json({ success: false, error: error.message });
+                res.status(500).json({ success: false, message: error.message });
         }
 
 };

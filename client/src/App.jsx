@@ -8,12 +8,14 @@ import PrivetRouts from "./utils/PrivetRouts";
 import Notes from "./Notes";
 import { useAuth } from "./contexts/auth";
 import { Navigate } from "react-router-dom";
-
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'
 function App() {
   const {user} = useAuth()
   return (
     <>
       <NavBar />
+      <ToastContainer position="top-left" autoClose={3000} />
       <Routes>
         <Route element={<PrivetRouts />}>
           <Route path="/notes" element={<Notes />} />

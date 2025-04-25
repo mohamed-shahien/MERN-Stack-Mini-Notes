@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import morgan from 'morgan';
 import notesRouter from './routes/notes.route.js';
 import usersRouter from './routes/users.route.js';
+import cors from 'cors';
 
 import { connectDB } from './config/database.js';
 
@@ -12,8 +13,10 @@ dotenv.config({
 
 const app = express();
 
+
 app.use(express.json());
 app.use(morgan('dev'));
+app.use(cors())
 
 
 app.use('/api/v1/notes', notesRouter);
