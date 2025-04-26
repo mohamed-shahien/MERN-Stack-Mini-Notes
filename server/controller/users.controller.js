@@ -2,18 +2,20 @@ import validator from 'validator';
 import bcrypt from 'bcryptjs';
 import { generateToken } from "../util/genrateToken.js";
 import User from "../models/users.model.js";
+import appError from '../util/AppError.js';
+import { ERROR, FAIL } from '../util/httpsStat.js';
 
 
 
-export const Login = async (req, res) => {
+export const Login = async (req, res, next) => {
         const { email, password } = req.body;
-        if (!email || !password) return res.status(400).json({ message: "Email and password are required" });
-        if (!validator.isEmail(email)) return res.status(400).json({ message: "Invalid email" });
+        if (!email || !password) return next(AppError.init(false, 400, FAIL, "Email and password are required"));
+        if (!validator.isEmail(email)) return next(AppError.init(false, 400, FAIL, "Invalid email"));
         try {
                 const user = await User.findOne({ email });
-                if (!user) return res.status(400).json({ message: "User not found" });
+                if (!user) return next(AppError.init(false, 400, FAIL, "User not found"));
                 const isMatch = await bcrypt.compare(password, user.password);
-                if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+                if (!isMatch) return next(AppError.init(false, 400, FAIL, "Invalid credentials"));
                 const token = await generateToken({ id: user._id }, "1d");
                 return res.status(200).json({
                         success: true,
@@ -25,56 +27,37 @@ export const Login = async (req, res) => {
                         token
                 });
         } catch (error) {
-                return res.status(500).json({ message: "Internal server error" });
+                return next(appError.init(false, 500, ERROR, error.message))
         }
 };
-
-
-export const Register = async (req, res) => {
+export const Register = async (req, res, next) => {
         const { email, password } = req.body;
-
         if (!email || !password) {
-                return res
-                        .status(400)
-                        .json({ success: false, message: "Please provide an email and password" });
+                return next(AppError.init(false, 400, FAIL, "Please provide an email and password"))
         }
-
         if (!validator.isEmail(email)) {
-                return res
-                        .status(400)
-                        .json({ success: false, message: "Please provide a valid email" });
+                return next(AppError.init(false, 400, FAIL, "Please provide a valid email address"))
         }
-
         if (!validator.isStrongPassword(password)) {
-                return res
-                        .status(400)
-                        .json({ success: false, message: "Please provide a strong password" });
+                return next(AppError.init(false, 400, FAIL, "Please provide a strong password"))
         }
 
         try {
                 const userExists = await User.findOne({ email });
-
                 if (userExists) {
-                        return res
-                                .status(400)
-                                .json({ success: false, message: "User already exists" });
+                        return next(AppError.init(false, 400, FAIL, "User already exists"))
                 }
-
                 const salt = await bcrypt.genSalt(10);
-
                 const hashedPassword = await bcrypt.hash(password, salt);
-
                 const savedUser = await new User({
                         email,
                         password: hashedPassword,
                 }).save();
                 console.log("savedUser", savedUser);
                 const token = await generateToken({ id: savedUser._id }, "1d");
-
-
                 res.status(200).json({ success: true, token });
         } catch (error) {
-                res.status(500).json({ success: false, message: error.message });
+                return next(appError.init(false, 500, ERROR, error.message))
         }
 
 };

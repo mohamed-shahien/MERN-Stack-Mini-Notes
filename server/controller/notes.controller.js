@@ -1,85 +1,64 @@
 import Note from '../models/notes.model.js'
 import mongoose from 'mongoose';
+import AppError from '../util/AppError.js';
+import { ERROR } from '../util/httpsStat.js';
 
-export const getAllNotes = async (req, res) => {
+export const getAllNotes = async (req, res, next) => {
         try {
-                const notes = await Note.find({userId: req.userId });
+                const notes = await Note.find({ userId: req.userId });
                 res.status(200).json({
                         success: true,
                         notes,
                 });
         } catch (error) {
-                return res.status(500).json({
-                        success: false,
-                        message: error.message,
-                });
+                return next(AppError.init(false, 500, ERROR, error.message))
         }
 }
-export const getNote = async (req, res) => {
+export const getNote = async (req, res, next) => {
         const noteId = req.params.id;
         if (!mongoose.Types.ObjectId.isValid(noteId)) {
-                return res.status(400).json({
-                        success: false,
-                        message: 'Invalid note ID',
-                });
+                return next(appError.init(false, 400, FAIL, "Invalid note ID"))
         }
         try {
-                const notes = await Note.find({ _id: noteId });
-                if (!notes) {
-                        return res.status(404).json({
-                                success: false,
-                                message: 'Note not found',
-                        });
+                const note = await Note.findById(noteId);
+                if (!note) {
+                        return next(appError.init(false, 404, FAIL, 'Note not found'));
                 }
                 return res.status(200).json({
                         success: true,
                         notes,
                 });
         } catch (error) {
-                return res.status(500).json({
-                        success: false,
-                        message: error.message,
-                });
+                return next(AppError.init(false, 500, ERROR, error.message))
+
         }
 }
-export const addNote = async (req, res) => {
+export const addNote = async (req, res, next) => {
         const userId = req.userId;
-
         try {
                 const note = await Note.create({
                         ...req.body,
-                        userId : userId
+                        userId: userId
                 });
                 res.status(201).json({
                         success: true,
                         data: note,
                 });
         } catch (error) {
-                res.status(400).json({
-                        success: false,
-                        error: error.message,
-                });
+                return next(AppError.init(false, 400, ERROR, error.message))
         }
 };
-export const updateNote = async (req, res) => {
+export const updateNote = async (req, res, next) => {
         try {
                 const updatedNote = await Note.findByIdAndUpdate(req.params.id, req.body);
-                if (!updatedNote) {
-                        return res.status(404).json({
-                                success: false,
-                                message: 'Note not found',
-                        });
-                }
+                if (!updatedNote) return next(appError.init(false, 404, FAIL, 'Note not found'));
                 res.status(200).json({
                         success: true,
                         message: 'Note updated successfully',
                         updatedNote,
                 });
         } catch (error) {
-                return res.status(500).json({
-                        success: false,
-                        message: error.message,
-                });
+                return next(AppError.init(false, 500, ERROR, error.message))
         }
 }
 
