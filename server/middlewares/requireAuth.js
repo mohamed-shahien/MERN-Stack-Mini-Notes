@@ -5,7 +5,6 @@ export const requireAuth = async (req, res, next) => {
     if (!authHeader) {
         return res.status(401).json({ message: "Authorization token is required" });
     }
-
     const token = authHeader.split(' ')[1]; // "Bearer <token>"
     jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
         if (err) {
